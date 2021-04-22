@@ -3,9 +3,12 @@ db_files/*
 
 # Maven build directory
 target
+*.settings
 
 # Compiled class file
 *.class
+*.classpath
+*.project
 
 # Log file
 *.log

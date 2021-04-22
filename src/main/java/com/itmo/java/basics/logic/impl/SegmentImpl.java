@@ -1,16 +1,52 @@
 package com.itmo.java.basics.logic.impl;
 
 import com.itmo.java.basics.initialization.SegmentInitializationContext;
+import com.itmo.java.basics.logic.DatabaseRecord;
 import com.itmo.java.basics.logic.Segment;
+import com.itmo.java.basics.logic.WritableDatabaseRecord;
+import com.itmo.java.basics.logic.io.DatabaseInputStream;
+import com.itmo.java.basics.logic.io.DatabaseOutputStream;
 import com.itmo.java.basics.exceptions.DatabaseException;
+import com.itmo.java.basics.index.SegmentOffsetInfo;
+import com.itmo.java.basics.index.impl.SegmentIndex;
+import com.itmo.java.basics.index.impl.SegmentOffsetInfoImpl;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 public class SegmentImpl implements Segment {
+
+    private final String segmentName;
+    private final Path segmentPath;
+    private SegmentOffsetInfoImpl actualOffset;
+    private final SegmentIndex segmentIndex;
+    private final long maxOffset = 100_000;
+
+    private SegmentImpl(String segmentName, Path path) throws DatabaseException {
+        this.segmentName = segmentName;
+        this.segmentPath = path;
+        this.actualOffset = new SegmentOffsetInfoImpl(0);
+        this.segmentIndex = new SegmentIndex();
+    }
+
     public static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
-        throw new UnsupportedOperationException();
+        Path path = Paths.get(tableRootPath.toString(), segmentName);
+        
+        if (Files.exists(path)) {
+            throw new DatabaseException("Segment " + segmentName + " already exists");
+        }
+        try {
+            Files.createFile(path);
+        } catch (IOException ioext) {
+            throw new DatabaseException("Can't create file " + path.toString(), ioext);
+        }
+
+        return new SegmentImpl(segmentName, path); // todo implement
     }
 
     public static Segment initializeFromContext(SegmentInitializationContext context) {
@@ -23,26 +59,54 @@ public class SegmentImpl implements Segment {
 
     @Override
     public String getName() {
-        return null;
+        return this.segmentName;
     }
 
     @Override
     public boolean write(String objectKey, byte[] objectValue) throws IOException {
-        return false;
+        if (objectValue == null) {
+            return delete(objectKey);
+        }
+
+        return writeInfoToFile(new SetDatabaseRecord(objectKey.getBytes(), objectValue), actualOffset);
     }
 
     @Override
     public Optional<byte[]> read(String objectKey) throws IOException {
-        return Optional.empty();
+        Optional<SegmentOffsetInfo> osoi = segmentIndex.searchForKey(objectKey);
+        
+        if (!osoi.isPresent()) {
+            return Optional.empty();
+        }
+
+        try (DatabaseInputStream dbis = new DatabaseInputStream(new FileInputStream(segmentPath.toString()))) {
+            dbis.skip(osoi.get().getOffset());
+            Optional<DatabaseRecord> odbr = dbis.readDbUnit();
+            return odbr.map(DatabaseRecord::getValue);
+        }
     }
 
     @Override
     public boolean isReadOnly() {
-        return false;
+        return actualOffset.getOffset() >= maxOffset ;
     }
 
     @Override
     public boolean delete(String objectKey) throws IOException {
-        return false;
+        return writeInfoToFile(new RemoveDatabaseRecord(objectKey.getBytes()), null);
+    }
+
+    private boolean writeInfoToFile(WritableDatabaseRecord wdbr, SegmentOffsetInfo soi) throws IOException {
+        if (isReadOnly()) {
+            return false;
+        }
+
+        try(DatabaseOutputStream dbos = new DatabaseOutputStream(new FileOutputStream(segmentPath.toString(), true))) {
+            dbos.write(wdbr);
+        }
+        segmentIndex.onIndexedEntityUpdated(new String(wdbr.getKey()), soi);
+        actualOffset = new SegmentOffsetInfoImpl(actualOffset.getOffset() + wdbr.size());
+
+        return true;
     }
 }
