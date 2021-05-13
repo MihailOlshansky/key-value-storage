@@ -27,11 +27,18 @@ public class SegmentImpl implements Segment {
     private final SegmentIndex segmentIndex;
     private final long maxOffset = 100_000;
 
-    private SegmentImpl(String segmentName, Path path) throws DatabaseException {
+    private SegmentImpl(String segmentName, Path path) {
         this.segmentName = segmentName;
         this.segmentPath = path;
         this.actualOffset = new SegmentOffsetInfoImpl(0);
         this.segmentIndex = new SegmentIndex();
+    }
+
+    private SegmentImpl(SegmentInitializationContext context) {
+        this.segmentName = context.getSegmentName();
+        this.segmentPath = context.getSegmentPath();
+        this.actualOffset = new SegmentOffsetInfoImpl(context.getCurrentSize());
+        this.segmentIndex = context.getIndex();
     }
 
     public static Segment create(String segmentName, Path tableRootPath) throws DatabaseException {
@@ -50,7 +57,7 @@ public class SegmentImpl implements Segment {
     }
 
     public static Segment initializeFromContext(SegmentInitializationContext context) {
-        return null;
+        return new SegmentImpl(context);
     }
 
     static String createSegmentName(String tableName) {
