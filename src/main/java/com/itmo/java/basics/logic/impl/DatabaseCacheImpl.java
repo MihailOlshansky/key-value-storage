@@ -5,9 +5,6 @@ import java.util.LinkedHashMap;
 import com.itmo.java.basics.logic.DatabaseCache;
 
 public class DatabaseCacheImpl implements DatabaseCache {
-<<<<<<< HEAD
-    private static final int CAPACITY = 5_000;
-=======
 
     public static int CAPACITY = 5_000;
 
@@ -23,7 +20,6 @@ public class DatabaseCacheImpl implements DatabaseCache {
     }
 
     private final CacheMap cacheMap = new CacheMap();
->>>>>>> 2c4f880 (Lab2 (#2))
 
     @Override
     public byte[] get(String key) {
