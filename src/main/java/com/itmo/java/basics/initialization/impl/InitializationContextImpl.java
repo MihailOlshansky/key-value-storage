@@ -6,6 +6,9 @@ import com.itmo.java.basics.initialization.InitializationContext;
 import com.itmo.java.basics.initialization.SegmentInitializationContext;
 import com.itmo.java.basics.initialization.TableInitializationContext;
 
+import lombok.Builder;
+
+@Builder
 public class InitializationContextImpl implements InitializationContext {
 
     private final ExecutionEnvironment executionEnvironment;
