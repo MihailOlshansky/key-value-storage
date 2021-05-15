@@ -6,7 +6,6 @@ import com.itmo.java.basics.initialization.TableInitializationContext;
 import com.itmo.java.basics.logic.Table;
 import com.itmo.java.basics.logic.Segment;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +34,14 @@ public class TableImpl implements Table {
         this.actualSegment = SegmentImpl.create(SegmentImpl.createSegmentName(tableName), path);
     }
 
-    static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
+    private TableImpl(TableInitializationContext context) {
+        this.tableName = context.getTableName();
+        this.pathToTable = context.getTablePath();
+        this.tableIndex = context.getTableIndex();
+        this.actualSegment = context.getCurrentSegment();
+    }
+
+    public static Table create(String tableName, Path pathToDatabaseRoot, TableIndex tableIndex) throws DatabaseException {
         Path path = Paths.get(pathToDatabaseRoot.toString(), tableName);
         
         if (Files.exists(path)) {
@@ -47,11 +53,11 @@ public class TableImpl implements Table {
             throw new DatabaseException("Can't create directory " + path.toString(), ioext);
         }
 
-        return new TableImpl(tableName, path, tableIndex);
+        return new CachingTable(new TableImpl(tableName, path, tableIndex));
     }
 
     public static Table initializeFromContext(TableInitializationContext context) {
-        return null;
+        return new CachingTable(new TableImpl(context));
     }
     
     @Override

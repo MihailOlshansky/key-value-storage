@@ -18,11 +18,18 @@ import java.util.Optional;
 public class DatabaseImpl implements Database {
     private final String dbName;
     private final Path pathToDataBase;
-    private final Map<String, Table> databaseTables = new HashMap<>();
+    private final Map<String, Table> databaseTables;
 
-    private DatabaseImpl(String dbName, Path path) throws DatabaseException {
+    private DatabaseImpl(String dbName, Path path) {
         this.dbName = dbName;
         this.pathToDataBase = path;
+        databaseTables = new HashMap<>();
+    }
+
+    private DatabaseImpl(DatabaseInitializationContext context) {
+        this.dbName = context.getDbName();
+        this.pathToDataBase = context.getDatabasePath();
+        databaseTables = context.getTables();
     }
 
     /**
@@ -50,7 +57,7 @@ public class DatabaseImpl implements Database {
     }
 
     public static Database initializeFromContext(DatabaseInitializationContext context) {
-        return null;
+        return new DatabaseImpl(context);
     }
 
     @Override

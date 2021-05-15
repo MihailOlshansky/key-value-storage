@@ -1,4 +1,4 @@
-# Project related fils
+# Project related files
 db_files/*
 
 # Maven build directory
