@@ -8,9 +8,10 @@ import com.itmo.java.protocol.model.RespObject;
  * Зафейленная команда
  */
 public class FailedDatabaseCommandResult implements DatabaseCommandResult {
+    private final String payLoad;
 
     public FailedDatabaseCommandResult(String payload) {
-        //TODO implement
+        this.payLoad = payload;
     }
 
     /**
@@ -18,8 +19,7 @@ public class FailedDatabaseCommandResult implements DatabaseCommandResult {
      */
     @Override
     public String getPayLoad() {
-        //TODO implement
-        return null;
+        return payLoad;
     }
 
     @Override
@@ -32,7 +32,6 @@ public class FailedDatabaseCommandResult implements DatabaseCommandResult {
      */
     @Override
     public RespObject serialize() {
-        //TODO implement
-        return null;
+        return new RespError(payLoad.getBytes());
     }
 }

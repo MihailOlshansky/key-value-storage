@@ -7,7 +7,6 @@ import com.itmo.java.basics.logic.Segment;
 import com.itmo.java.basics.logic.WritableDatabaseRecord;
 import com.itmo.java.basics.logic.io.DatabaseInputStream;
 import com.itmo.java.basics.logic.io.DatabaseOutputStream;
-import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.index.SegmentOffsetInfo;
 import com.itmo.java.basics.index.impl.SegmentIndex;
 import com.itmo.java.basics.index.impl.SegmentOffsetInfoImpl;
@@ -69,6 +68,12 @@ public class SegmentImpl implements Segment {
     }
 
     static String createSegmentName(String tableName) {
+        try {
+            Thread.sleep(1);
+        } catch (InterruptedException intext) {
+            return tableName + "_" + System.currentTimeMillis();
+        }
+        
         return tableName + "_" + System.currentTimeMillis();
     }
 

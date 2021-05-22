@@ -4,6 +4,7 @@ import com.itmo.java.basics.console.DatabaseCommand;
 import com.itmo.java.basics.console.DatabaseCommandArgPositions;
 import com.itmo.java.basics.console.DatabaseCommandResult;
 import com.itmo.java.basics.console.ExecutionEnvironment;
+import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.protocol.model.RespObject;
 
 import java.util.List;
@@ -12,6 +13,11 @@ import java.util.List;
  * Команда для создания базы таблицы
  */
 public class CreateTableCommand implements DatabaseCommand {
+
+    private static final int NUM_OF_ARGS = 4;
+
+    private final ExecutionEnvironment env;
+    private final List<RespObject> commandArgs;
 
     /**
      * Создает команду
@@ -23,8 +29,22 @@ public class CreateTableCommand implements DatabaseCommand {
      *                    Id команды, имя команды, имя бд, имя таблицы
      * @throws IllegalArgumentException если передано неправильное количество аргументов
      */
-    public CreateTableCommand(ExecutionEnvironment env, List<RespObject> commandArgs) {
-        //TODO implement
+    public CreateTableCommand(ExecutionEnvironment env, List<RespObject> commandArgs) throws IllegalArgumentException {
+        if (commandArgs.size() < NUM_OF_ARGS) {
+            throw new IllegalArgumentException("Not enough arguments to create table");
+        }
+        if (commandArgs.size() > NUM_OF_ARGS) {
+            throw new IllegalArgumentException("Too much arguments to create table");
+        }
+
+        for (var object : commandArgs) {
+            if (object == null) {
+                throw new IllegalArgumentException("Some arguments are null");
+            }
+        }
+
+        this.env = env;
+        this.commandArgs = commandArgs;
     }
 
     /**
@@ -34,7 +54,15 @@ public class CreateTableCommand implements DatabaseCommand {
      */
     @Override
     public DatabaseCommandResult execute() {
-        //TODO implement
-        return null;
+        try {
+            String dbName = commandArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
+            String tableName = commandArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
+            env.getDatabase(dbName).get().createTableIfNotExists(tableName);
+            return DatabaseCommandResult.success(("Table " + tableName + " created successfully").getBytes());
+        } catch (DatabaseException dbext) {
+            return DatabaseCommandResult.error("Can't create table, because " + dbext.getMessage());
+        } catch (Exception ext) {
+            return DatabaseCommandResult.error("Can't create table");
+        }
     }
 }
