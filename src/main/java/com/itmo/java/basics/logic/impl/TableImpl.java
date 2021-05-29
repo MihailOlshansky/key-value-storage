@@ -6,6 +6,7 @@ import com.itmo.java.basics.initialization.TableInitializationContext;
 import com.itmo.java.basics.logic.Table;
 import com.itmo.java.basics.logic.Segment;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
