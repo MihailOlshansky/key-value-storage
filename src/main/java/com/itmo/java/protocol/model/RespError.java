@@ -13,8 +13,10 @@ public class RespError implements RespObject {
      */
     public static final byte CODE = '-';
 
+    private final byte[] byteMessage;
+
     public RespError(byte[] message) {
-        //TODO implement
+        this.byteMessage = message;
     }
 
     /**
@@ -29,12 +31,13 @@ public class RespError implements RespObject {
 
     @Override
     public String asString() {
-        //TODO implement
-        return null;
+        return new String(byteMessage);
     }
 
     @Override
     public void write(OutputStream os) throws IOException {
-        //TODO implement
+        os.write(CODE);
+        os.write(byteMessage);
+        os.write(CRLF);
     }
 }

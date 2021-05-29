@@ -10,13 +10,14 @@ import com.itmo.java.protocol.model.RespCommandId;
 public class CreateDatabaseKvsCommand implements KvsCommand {
     private static final String COMMAND_NAME = "CREATE_DATABASE";
 
+    private final String dbName;
     /**
      * Создает объект
      *
      * @param databaseName имя базы данных
      */
     public CreateDatabaseKvsCommand(String databaseName) {
-        //TODO implement
+        this.dbName = databaseName;
     }
 
     /**
@@ -26,13 +27,15 @@ public class CreateDatabaseKvsCommand implements KvsCommand {
      */
     @Override
     public RespArray serialize() {
-        //TODO implement
-        return null;
+        return new RespArray(
+            new RespCommandId(idGen.intValue()),
+            new RespBulkString(COMMAND_NAME.getBytes()),
+            new RespBulkString(dbName.getBytes())
+        );
     }
 
     @Override
     public int getCommandId() {
-        //TODO implement
-        return 0;
+        return idGen.intValue();
     }
 }

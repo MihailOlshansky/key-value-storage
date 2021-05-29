@@ -2,6 +2,7 @@ package com.itmo.java.protocol.model;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -14,11 +15,15 @@ public class RespArray implements RespObject {
      */
     public static final byte CODE = '*';
 
+    private final List<RespObject> objects = new LinkedList<RespObject>();
+
     public RespArray(RespObject... objects) {
-        //TODO implement
+        for (var object : objects) {
+            this.objects.add(object);
+        }
     }
 
-    /**
+    /** 
      * Ошибка ли это? Ответ - нет
      *
      * @return false
@@ -35,17 +40,24 @@ public class RespArray implements RespObject {
      */
     @Override
     public String asString() {
-        //TODO implement
-        return null;
+        StringBuilder str = new StringBuilder("");
+        for (var object : objects){
+            str.append(object.asString()).append(" ");
+        }
+        return str.toString();
     }
 
     @Override
     public void write(OutputStream os) throws IOException {
-        //TODO implement
+        os.write(CODE);
+        os.write(String.valueOf(objects.size()).getBytes());
+        os.write(CRLF);
+        for (var object : objects){
+            object.write(os);
+        }
     }
 
     public List<RespObject> getObjects() {
-        //TODO implement
-        return null;
+        return objects;
     }
 }

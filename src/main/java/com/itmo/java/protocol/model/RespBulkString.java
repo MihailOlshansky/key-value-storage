@@ -11,13 +11,13 @@ public class RespBulkString implements RespObject {
      * Код объекта
      */
     public static final byte CODE = '$';
-
     public static final int NULL_STRING_SIZE = -1;
 
     public static final RespBulkString NULL_STRING = new RespBulkString(null);
+    private final byte[] byteString;
 
     public RespBulkString(byte[] data) {
-        //TODO implement
+        this.byteString = data;
     }
 
     /**
@@ -37,12 +37,23 @@ public class RespBulkString implements RespObject {
      */
     @Override
     public String asString() {
-        //TODO implement
-        return null;
+        if(byteString == null) {
+            return null;
+        }
+        return new String(byteString);
     }
 
     @Override
     public void write(OutputStream os) throws IOException {
-        //TODO implement
+        os.write(CODE);
+        if(byteString != null) {
+            os.write(String.valueOf(byteString.length).getBytes());
+            os.write(CRLF);
+            os.write(byteString);
+            os.write(CRLF);
+        } else {
+            os.write(String.valueOf(NULL_STRING_SIZE).getBytes());
+            os.write(CRLF);
+        }
     }
 }

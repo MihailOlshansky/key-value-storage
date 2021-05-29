@@ -10,8 +10,12 @@ import com.itmo.java.protocol.model.RespCommandId;
 public class CreateTableKvsCommand implements KvsCommand {
     private static final String COMMAND_NAME = "CREATE_TABLE";
 
+    private final String dbName;
+    private final String tableName;
+
     public CreateTableKvsCommand(String databaseName, String tableName) {
-        //TODO implement
+        this.dbName = databaseName;
+        this.tableName = tableName;
     }
 
     /**
@@ -21,13 +25,16 @@ public class CreateTableKvsCommand implements KvsCommand {
      */
     @Override
     public RespArray serialize() {
-        //TODO implement
-        return null;
+        return new RespArray(
+            new RespCommandId(idGen.intValue()),
+            new RespBulkString(COMMAND_NAME.getBytes()),
+            new RespBulkString(dbName.getBytes()),
+            new RespBulkString(tableName.getBytes())
+        );
     }
 
     @Override
     public int getCommandId() {
-        //TODO implement
-        return 0;
+        return idGen.intValue();
     }
 }
