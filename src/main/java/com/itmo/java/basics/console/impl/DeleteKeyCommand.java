@@ -4,7 +4,6 @@ import com.itmo.java.basics.console.DatabaseCommand;
 import com.itmo.java.basics.console.DatabaseCommandArgPositions;
 import com.itmo.java.basics.console.DatabaseCommandResult;
 import com.itmo.java.basics.console.ExecutionEnvironment;
-import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.protocol.model.RespObject;
 
 import java.util.List;
@@ -60,10 +59,8 @@ public class DeleteKeyCommand implements DatabaseCommand {
             var prevValue = env.getDatabase(dbName).get().read(tableName, objectKey).get();
             env.getDatabase(dbName).get().delete(tableName, objectKey);
             return DatabaseCommandResult.success(prevValue);
-        } catch (DatabaseException dbext) {
-            return DatabaseCommandResult.error("Can't delete key, because " + dbext.getMessage());
         } catch (Exception ext) {
-            return DatabaseCommandResult.error("Can't delete key");
+            return DatabaseCommandResult.error("Can't delete key, because " + ext.getMessage());
         }
     }
 }

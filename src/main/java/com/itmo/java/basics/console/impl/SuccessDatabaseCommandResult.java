@@ -34,6 +34,9 @@ public class SuccessDatabaseCommandResult implements DatabaseCommandResult {
      */
     @Override
     public RespObject serialize() {
+        if (payLoad == null) {
+            return RespBulkString.NULL_STRING;
+        }
         return new RespBulkString(payLoad.getBytes());
     }
 }

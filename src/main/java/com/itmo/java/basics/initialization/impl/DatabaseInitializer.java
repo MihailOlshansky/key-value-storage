@@ -39,7 +39,7 @@ public class DatabaseInitializer implements Initializer {
         File[] tableDirList = databasePath.toFile().listFiles();
         
         if(tableDirList == null) {
-            throw new DatabaseException(databasePath.toString() + " not a directory");
+            return;
         }
 
         for(File tableDir : tableDirList) {

@@ -5,9 +5,11 @@ import com.itmo.java.basics.console.DatabaseCommandArgPositions;
 import com.itmo.java.basics.console.DatabaseCommandResult;
 import com.itmo.java.basics.console.ExecutionEnvironment;
 import com.itmo.java.basics.exceptions.DatabaseException;
+import com.itmo.java.basics.logic.Database;
 import com.itmo.java.protocol.model.RespObject;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Команда для чтения данных по ключу
@@ -57,12 +59,18 @@ public class GetKeyCommand implements DatabaseCommand {
             String dbName = commandArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
             String tableName = commandArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
             String objectKey = commandArgs.get(DatabaseCommandArgPositions.KEY.getPositionIndex()).asString();
-            byte[] value = env.getDatabase(dbName).get().read(tableName, objectKey).get();
-            return DatabaseCommandResult.success(value);
-        } catch (DatabaseException dbext) {
-            return DatabaseCommandResult.success(null);
+
+            Optional<Database> database = env.getDatabase(dbName);
+            if (database.isEmpty()) {
+                throw new DatabaseException("No database with name " + dbName);
+            }
+            Optional<byte[]> value = database.get().read(tableName, objectKey);
+            if (value.isEmpty()) {
+                return DatabaseCommandResult.success(null);
+            }
+            return DatabaseCommandResult.success(value.get());
         } catch (Exception ext) {
-            return DatabaseCommandResult.error("Can't get key's value");
+            return DatabaseCommandResult.error("Can't get key's value, because" + ext.getMessage());
         }
     }
 }

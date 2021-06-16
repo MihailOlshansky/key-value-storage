@@ -39,7 +39,7 @@ public class TableInitializer implements Initializer {
         var segmentFileList = tablePath.toFile().listFiles();
 
         if(segmentFileList == null) {
-            throw new DatabaseException(tablePath + " not a directory");
+            return;
         }
 
         Arrays.sort(segmentFileList);

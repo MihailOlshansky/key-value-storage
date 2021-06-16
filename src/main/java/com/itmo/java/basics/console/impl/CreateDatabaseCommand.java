@@ -4,7 +4,6 @@ import com.itmo.java.basics.console.DatabaseCommand;
 import com.itmo.java.basics.console.DatabaseCommandArgPositions;
 import com.itmo.java.basics.console.DatabaseCommandResult;
 import com.itmo.java.basics.console.ExecutionEnvironment;
-import com.itmo.java.basics.exceptions.DatabaseException;
 import com.itmo.java.basics.logic.DatabaseFactory;
 import com.itmo.java.protocol.model.RespObject;
 
@@ -62,10 +61,8 @@ public class CreateDatabaseCommand implements DatabaseCommand {
             String dbName = commandArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
             env.addDatabase(factory.createNonExistent(dbName, env.getWorkingPath()));
             return DatabaseCommandResult.success(("Database " + dbName + " created successfully").getBytes());
-        } catch (DatabaseException dbext) {
-            return DatabaseCommandResult.error("Can't create database, because " + dbext.getMessage());
         } catch (Exception ext) {
-            return DatabaseCommandResult.error("Can't create database");
+            return DatabaseCommandResult.error("Can't create database, because " + ext.getMessage());
         }
     }
 }

@@ -5,9 +5,11 @@ import com.itmo.java.basics.console.DatabaseCommandArgPositions;
 import com.itmo.java.basics.console.DatabaseCommandResult;
 import com.itmo.java.basics.console.ExecutionEnvironment;
 import com.itmo.java.basics.exceptions.DatabaseException;
+import com.itmo.java.basics.logic.Database;
 import com.itmo.java.protocol.model.RespObject;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Команда для создания базы таблицы
@@ -57,12 +59,14 @@ public class CreateTableCommand implements DatabaseCommand {
         try {
             String dbName = commandArgs.get(DatabaseCommandArgPositions.DATABASE_NAME.getPositionIndex()).asString();
             String tableName = commandArgs.get(DatabaseCommandArgPositions.TABLE_NAME.getPositionIndex()).asString();
-            env.getDatabase(dbName).get().createTableIfNotExists(tableName);
+            Optional<Database> database = env.getDatabase(dbName);
+            if (database.isEmpty()) {
+                throw new DatabaseException("No database with name " + dbName);
+            }
+            database.get().createTableIfNotExists(tableName);
             return DatabaseCommandResult.success(("Table " + tableName + " created successfully").getBytes());
-        } catch (DatabaseException dbext) {
-            return DatabaseCommandResult.error("Can't create table, because " + dbext.getMessage());
         } catch (Exception ext) {
-            return DatabaseCommandResult.error("Can't create table");
+            return DatabaseCommandResult.error("Can't create table because " + ext.getMessage());
         }
     }
 }
